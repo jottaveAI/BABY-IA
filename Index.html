@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>IA Objetos + Reconhecimento Facial — Export/Import DB</title>
+
+<!-- Normalize.css para consistência entre navegadores -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-oHDEc8XedQ2DPSZ1u7UdQdZ0gNvlxLZfZ6XQdBw6PRa+N1IklF8p6VfXl0mGx02q7ZlYf7+XqgkFV3Y6gT/Rg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- TFJS e modelos -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+
+<style>
+  /* ====== Estilos gerais ====== */
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #0e0e12;
+    color: #f1f1f8;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    color: #b38cff;
+    text-shadow: 0 0 12px rgba(179,140,255,0.5);
+    margin-top: 20px;
+  }
+
+  video {
+    border: 2px solid #b38cff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(179,140,255,0.2);
+    margin-top: 15px;
+    width: 480px;
+    height: 360px;
+    object-fit: cover;
+  }
+
+  #controls {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  button, input[type="file"] {
+    background: #1e1e28;
+    color: #fff;
+    border: 1px solid #b38cff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  button:hover, input[type="file"]:hover {
+    background: #b38cff;
+    color: #0e0e12;
+    box-shadow: 0 0 10px #b38cffaa;
+  }
+
+  #status {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #cfcff5;
+  }
+
+  #note {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 6px;
+  }
+</style>
+</head>
+
+<body>
+<h1>🤖 IA Objetos + Reconhecimento Facial</h1>
+
+<video id="video" autoplay muted></video>
+
+<div id="controls">
+  <button id="learnObjBtn">Ensinar Objeto</button>
+  <button id="objectBtn">Reconhecimento de Objetos</button>
+  <button id="retrainBackgroundBtn">Retreinar Fundo</button>
+  <button id="learnFaceBtn">Adicionar Rosto</button>
+  <button id="faceBtn">Reconhecimento Facial</button>
+  <button id="clearBtn">Limpar Aprendizados</button>
+  <button id="downloadBtn">Baixar Base (.json)</button>
+  <button id="uploadBtn">Carregar Base (.json)</button>
+  <input id="fileInput" type="file" accept=".json" style="display:none" />
+</div>
+
+<div id="status">Carregando modelos...</div>
+<div id="note">Dica: Ao ativar reconhecimento de objetos, o fundo será treinado automaticamente. Use "Retreinar Fundo" caso o cenário mude.</div>
+
+<script>
+/* ===== Configurações ===== */
+const video = document.getElementById('video');
+const statusEl = document.getElementById('status');
+const fileInput = document.getElementById('fileInput');
+
+const classifierObjects = knnClassifier.create();
+const classifierFaces = knnClassifier.create();
+let net = null, faceModel = null;
+let recognizeObjects = false, recognizeFaces = false;
+
+const BACKGROUND_LABEL = '__sem_objeto__';
+const OBJECT_CONF_THRESHOLD = 0.72;
+const TRAIN_FRAMES = 10;
+
+function setStatus(txt) { statusEl.textContent = txt; }
+
+/* ===== Inicialização da câmera ===== */
+async function setupCamera() {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+  video.srcObject = stream;
+  await new Promise(r => video.onloadedmetadata = r);
+  video.play();
+}
+
+/* ===== Carregamento dos modelos ===== */
+async function loadModels() {
+  setStatus('Carregando MobileNet e BlazeFace...');
+  net = await mobilenet.load();
+  faceModel = await blazeface.load();
+  setStatus('Modelos carregados! Escolha uma opção.');
+}
+
+/* ===== Treino de objetos ===== */
+async function trainObject(label, frames = TRAIN_FRAMES) {
+  setStatus(`Treinando objeto "${label}"...`);
+  for (let i = 0; i < frames; i++) {
+    const img = tf.browser.fromPixels(video);
+    const activation = net.infer(img, true);
+    classifierObjects.addExample(activation, label.toLowerCase());
+    img.dispose();
+    await tf.nextFrame();
+  }
+  setStatus(`Objeto "${label}" treinado.`);
+}
+
+async function trainBackground(samples = 12) {
+  setStatus('Treinando fundo (sem objeto)...');
+  for (let i = 0; i < samples; i++) {
+    const img = tf.browser.fromPixels(video);
+    const activation = net.infer(img, true);
+    classifierObjects.addExample(activation, BACKGROUND_LABEL);
+    img.dispose();
+    await tf.nextFrame();
+    await new Promise(r => setTimeout(r, 120));
+  }
+  setStatus('Fundo treinado.');
+}
+
+/* ===== Treino de rostos ===== */
+async function trainFace(name, frames = TRAIN_FRAMES) {
+  setStatus(`Treinando rosto "${name}"...`);
+  for (let i = 0; i < frames; i++) {
+    const preds = await faceModel.estimateFaces(video, false);
+    if (preds.length > 0) {
+      const f = preds[0];
+      const x = Math.max(0, Math.floor(f.topLeft[0])), y = Math.max(0, Math.floor(f.topLeft[1]));
+      const w = Math.max(8, Math.floor(f.bottomRight[0] - x)), h = Math.max(8, Math.floor(f.bottomRight[1] - y));
+      const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+      tmp.getContext('2d').drawImage(video, x, y, w, h, 0, 0, w, h);
+      const t = tf.browser.fromPixels(tmp);
+      const activation = net.infer(t, true);
+      classifierFaces.addExample(activation, name.toLowerCase());
+      t.dispose();
+    }
+    await tf.nextFrame();
+    await new Promise(r => setTimeout(r, 200));
+  }
+  setStatus(`Rosto "${name}" treinado.`);
+}
+
+/* ===== Export/Import DB ===== */
+function serializeClassifier(classifier) {
+  const dataset = classifier.getClassifierDataset();
+  const obj = {};
+  if (!dataset) return obj;
+  Object.keys(dataset).forEach(label => {
+    const tensor = dataset[label];
+    obj[label] = { data: Array.from(tensor.dataSync()), shape: tensor.shape };
+  });
+  return obj;
+}
+
+function deserializeAndSetClassifier(classifier, obj) {
+  const tensorObj = {};
+  if (!obj) return;
+  Object.keys(obj).forEach(label => {
+    const { data, shape } = obj[label];
+    tensorObj[label] = tf.tensor(data, shape, 'float32');
+  });
+  classifier.setClassifierDataset(tensorObj);
+}
+
+function downloadDatabase() {
+  const payload = { objects: serializeClassifier(classifierObjects), faces: serializeClassifier(classifierFaces) };
+  const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ia_database.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setStatus('Arquivo de banco baixado.');
+}
+
+async function loadDatabaseFromFile(file) {
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if (parsed.objects) deserializeAndSetClassifier(classifierObjects, parsed.objects);
+    if (parsed.faces) deserializeAndSetClassifier(classifierFaces, parsed.faces);
+    setStatus('Base carregada do arquivo!');
+  } catch (e) {
+    console.error(e); setStatus('Erro ao carregar arquivo.');
+  }
+}
+
+/* ===== Loop de predição contínua ===== */
+async function predictionLoop() {
+  while (true) {
+    if (recognizeObjects) {
+      if (classifierObjects.getNumClasses() === 0) setStatus('Sem Objeto');
+      else {
+        const img = tf.browser.fromPixels(video);
+        const activation = net.infer(img, true);
+        const result = await classifierObjects.predictClass(activation);
+        img.dispose();
+        const confidences = Object.values(result.confidences || {});
+        const maxConf = confidences.length ? Math.max(...confidences) : 0;
+        if (result.label === BACKGROUND_LABEL || maxConf < OBJECT_CONF_THRESHOLD) setStatus('Sem Objeto');
+        else setStatus(`📦 Isto é um(a): ${result.label}`);
+      }
+    }
+
+    if (recognizeFaces) {
+      if (classifierFaces.getNumClasses() === 0) setStatus('🔍 Nenhum rosto treinado');
+      else {
+        const preds = await faceModel.estimateFaces(video, false);
+        if (preds.length > 0) {
+          const f = preds[0];
+          const x = Math.max(0, Math.floor(f.topLeft[0])), y = Math.max(0, Math.floor(f.topLeft[1]));
+          const w = Math.max(8, Math.floor(f.bottomRight[0]-x)), h = Math.max(8, Math.floor(f.bottomRight[1]-y));
+          const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+          tmp.getContext('2d').drawImage(video, x, y, w, h, 0, 0, w, h);
+          const t = tf.browser.fromPixels(tmp);
+          const activation = net.infer(t, true);
+          const faceResult = await classifierFaces.predictClass(activation);
+          t.dispose();
+          const confidences = faceResult.confidences || {};
+          const bestLabel = faceResult.label;
+          const bestConf = confidences[bestLabel] || 0;
+          if (bestConf > 0.7) setStatus(`😀 Rosto: ${bestLabel}`);
+          else setStatus('🔍 Rosto desconhecido');
+        } else setStatus('🔍 Sem rosto');
+      }
+    }
+
+    await tf.nextFrame();
+  }
+}
+
+/* ===== Botões ===== */
+document.getElementById('learnObjBtn').onclick = async () => {
+  const name = prompt('Nome do objeto:'); if (!name) return; await trainObject(name);
+};
+document.getElementById('objectBtn').onclick = async () => { await trainBackgroundIfNeededOrAuto(); recognizeObjects = true; recognizeFaces = false; setStatus('Modo: Reconhecimento de Objetos ativado'); };
+document.getElementById('retrainBackgroundBtn').onclick = async () => { await trainBackground(18); };
+document.getElementById('learnFaceBtn').onclick = async () => { const name = prompt('Nome da pessoa:'); if (!name) return; await trainFace(name); };
+document.getElementById('faceBtn').onclick = () => { recognizeFaces = true; recognizeObjects = false; setStatus('Modo: Reconhecimento Facial ativado'); };
+document.getElementById('clearBtn').onclick = () => { classifierObjects.clearAllClasses(); classifierFaces.clearAllClasses(); setStatus('Todos aprendizados apagados.'); };
+document.getElementById('downloadBtn').onclick = () => { downloadDatabase(); };
+document.getElementById('uploadBtn').onclick = () => fileInput.click();
+fileInput.onchange = (ev) => { const file = ev.target.files[0]; if (!file) return; loadDatabaseFromFile(file); fileInput.value = ''; };
+
+async function trainBackgroundIfNeededOrAuto() {
+  const ds = classifierObjects.getClassifierDataset() || {};
+  if (!Object.keys(ds).includes(BACKGROUND_LABEL)) await trainBackground(12);
+}
+
+/* ===== Inicialização ===== */
+async function init() {
+  try {
+    await setupCamera();
+    await loadModels();
+    predictionLoop();
+  } catch (e) { console.error(e); setStatus('Erro ao iniciar: ' + e.message); }
+}
+
+init();
+</script>
+</body>
+</html>
