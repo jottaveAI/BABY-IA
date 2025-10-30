@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>IA Objetos + Reconhecimento Facial com Alerta Óculos</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f5f5f5; color: #222; }
+    h1 { margin-top: 20px; }
+    video { border-radius: 10px; border: 2px solid #333; margin-top: 15px; }
+    #status { font-size: 18px; margin-top: 10px; font-weight: bold; color: #007bff; }
+    button { margin: 10px; padding: 10px 20px; border: none; border-radius: 10px; background: #007BFF; color: white; font-size: 15px; cursor: pointer; transition: 0.3s; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>🤖 IA Objetos + Reconhecimento Facial</h1>
+  <video id="video" width="400" height="300" autoplay></video><br>
+  <div>
+    <button id="learnObjBtn">Ensinar Objeto</button>
+    <button id="objectBtn">Reconhecimento de Objetos</button>
+    <button id="learnFaceBtn">Adicionar Rosto</button>
+    <button id="faceBtn">Reconhecimento Facial</button>
+    <button id="clearBtn">Limpar Aprendizados</button>
+  </div>
+  <div id="status">Carregando modelos...</div>
+  <audio id="alertaSom" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+  <script>
+    const video = document.getElementById('video');
+    const statusEl = document.getElementById('status');
+    const alertaSom = document.getElementById('alertaSom');
+
+    async function setupCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      return new Promise(resolve => { video.onloadedmetadata = () => resolve(video); });
+    }
+
+    const classifierObjects = knnClassifier.create();
+    const classifierFaces = knnClassifier.create();
+    let net;
+    let faceModel;
+
+    async function carregarModeloObjetos() {
+      net = await mobilenet.load();
+      console.log("✅ MobileNet carregado!");
+    }
+
+    async function carregarFaceModel() {
+      faceModel = await blazeface.load();
+      console.log("✅ BlazeFace carregado!");
+    }
+
+    let recognizeObjects = false;
+    let recognizeFaces = false;
+
+    function normalizeLabel(s) {
+      return s ? s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase() : s;
+    }
+
+    document.getElementById('learnObjBtn').onclick = async () => {
+      const nomeRaw = prompt("O que é este objeto?");
+      if (!nomeRaw) return;
+      const nome = normalizeLabel(nomeRaw);
+      statusEl.textContent = `Aprendendo objeto: ${nome}...`;
+      for (let i = 0; i < 20; i++) {
+        const img = tf.browser.fromPixels(video);
+        const activation = net.infer(img, true);
+        classifierObjects.addExample(activation, nome);
+        img.dispose();
+        await tf.nextFrame();
+      }
+      statusEl.textContent = `Objeto "${nome}" aprendido!`;
+    };
+
+    document.getElementById('objectBtn').onclick = () => {
+      recognizeObjects = true;
+      recognizeFaces = false;
+      statusEl.textContent = "Modo: Reconhecimento de Objetos ativado";
+    };
+
+    document.getElementById('learnFaceBtn').onclick = async () => {
+      const nomeRaw = prompt("Digite o nome da pessoa:");
+      if (!nomeRaw) return;
+      const nome = normalizeLabel(nomeRaw);
+      statusEl.textContent = `Aprendendo rosto: ${nome}...`;
+      for (let i = 0; i < 30; i++) {
+        const predictions = await faceModel.estimateFaces(video, false);
+        if (predictions.length > 0) {
+          const face = predictions[0];
+          const x = Math.round(face.topLeft[0]), y = Math.round(face.topLeft[1]);
+          const width = Math.round(face.bottomRight[0] - x);
+          const height = Math.round(face.bottomRight[1] - y);
+          if (width <= 0 || height <= 0) continue;
+
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = width;
+          tempCanvas.height = height;
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+          const imgTensor = tf.browser.fromPixels(tempCanvas);
+
+          const activation = net.infer(imgTensor, true);
+          classifierFaces.addExample(activation, nome);
+          imgTensor.dispose();
+        }
+        await tf.nextFrame();
+      }
+      statusEl.textContent = `Rosto "${nome}" aprendido!`;
+    };
+
+    document.getElementById('faceBtn').onclick = () => {
+      recognizeFaces = true;
+      recognizeObjects = false;
+      statusEl.textContent = "Modo: Reconhecimento Facial ativado";
+    };
+
+    document.getElementById('clearBtn').onclick = () => {
+      classifierObjects.clearAllClasses();
+      classifierFaces.clearAllClasses();
+      statusEl.textContent = "Todos aprendizados apagados.";
+    };
+
+    async function predizer() {
+      while (true) {
+        // --- RECONHECIMENTO DE OBJETOS ---
+        if (recognizeObjects && classifierObjects.getNumClasses() > 0) {
+          const img = tf.browser.fromPixels(video);
+          const activation = net.infer(img, true);
+          const result = await classifierObjects.predictClass(activation);
+          img.dispose();
+          activation.dispose();
+
+          const conf = result.confidences[result.label] || 0;
+          if (conf > 0.7) {
+            statusEl.textContent = `📦 Isto é um(a): ${result.label}`;
+          } else {
+            statusEl.textContent = "🔍 Objeto desconhecido";
+          }
+        }
+
+        // --- RECONHECIMENTO FACIAL (com alerta de óculos integrado) ---
+        if (recognizeFaces && classifierFaces.getNumClasses() > 0) {
+          const predictions = await faceModel.estimateFaces(video, false);
+          if (predictions.length > 0) {
+            const face = predictions[0];
+            const x = Math.round(face.topLeft[0]), y = Math.round(face.topLeft[1]);
+            const width = Math.round(face.bottomRight[0] - x);
+            const height = Math.round(face.bottomRight[1] - y);
+
+            if (width <= 0 || height <= 0) { 
+              await tf.nextFrame();
+              continue; 
+            }
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(video, x, y, width, height, 0, 0, width, height);
+            const faceTensor = tf.browser.fromPixels(tempCanvas);
+
+            const faceActivation = net.infer(faceTensor, true);
+            const faceResult = await classifierFaces.predictClass(faceActivation);
+            faceTensor.dispose();
+            faceActivation.dispose();
+
+            // 🔍 Detecção de óculos mesmo em modo facial
+            let alertaOculos = false;
+            if (classifierObjects.getNumClasses() > 0) {
+              const objTensor = tf.browser.fromPixels(video);
+              const objActivation = net.infer(objTensor, true);
+              const objResult = await classifierObjects.predictClass(objActivation);
+              objTensor.dispose();
+              objActivation.dispose();
+
+              const label = normalizeLabel(objResult.label);
+              if (label.includes("oculos") || label.includes("óculos")) {
+                alertaOculos = true;
+              }
+            }
+
+            if (alertaOculos) {
+              statusEl.textContent = "⚠️ Retire seu óculos";
+              alertaSom.play();
+            } else if (faceResult.confidences[faceResult.label] > 0.7) {
+              statusEl.textContent = `😀 Rosto: ${faceResult.label}`;
+            } else {
+              statusEl.textContent = "🔍 Rosto desconhecido";
+            }
+
+          } else {
+            statusEl.textContent = "🔍 Sem rosto detectado";
+          }
+        }
+
+        await tf.nextFrame();
+      }
+    }
+
+    async function init() {
+      await setupCamera();
+      video.play();
+      await carregarModeloObjetos();
+      await carregarFaceModel();
+      statusEl.textContent = "Modelos carregados! Escolha uma opção.";
+      predizer();
+    }
+
+    init();
+  </script>
+</body>
+</html>
