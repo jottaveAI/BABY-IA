@@ -1,38 +1,50 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista Dino</title>
   <style>
+    /* ==================== ESTILIZAÇÃO GERAL ==================== */
     body {
       font-family: "Comic Sans MS", sans-serif;
       background: #c0f0ff;
       margin: 0;
-      padding: 0;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: 100vh;
     }
+
+    /* Título principal com sombra temática */
     h1 {
       color: #2b4d63;
-      margin-top: 30px;
+      margin: 20px 0 10px;
       font-size: 2.5rem;
       text-shadow: 2px 2px #7ee0ff;
     }
+
+    /* Container principal com bordas arredondadas e sombra */
     .container {
       background: #ffffff;
-      padding: 20px;
+      padding: 25px;
       border-radius: 20px;
       width: 90%;
       max-width: 500px;
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
+
+    /* ==================== CAMPOS DE ENTRADA ==================== */
     #inputTarefa {
-      width: 70%;
-      padding: 8px;
+      width: 68%;
+      padding: 10px;
       border-radius: 10px;
       border: 2px solid #63bad1;
       font-size: 1.1rem;
+      margin-right: 5px;
     }
+
     #btnAdd {
       padding: 10px 15px;
       background: #63bad1;
@@ -41,18 +53,23 @@
       color: white;
       font-size: 1rem;
       cursor: pointer;
+      vertical-align: middle;
     }
+
     #btnAdd:hover {
       background: #4ca5bd;
     }
+
+    /* ==================== LISTA DE TAREFAS ==================== */
     ul {
       list-style: none;
       padding: 0;
       margin-top: 20px;
     }
+
     li {
       background: #e2f8ff;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       border-radius: 10px;
       display: flex;
@@ -61,84 +78,139 @@
       font-size: 1.1rem;
       border-left: 6px solid #63bad1;
     }
+
+    /* Botão de concluir tarefa */
     button.concluir {
       background: #7ed957;
       border: none;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
       color: white;
       cursor: pointer;
+      font-weight: bold;
     }
+
     button.concluir:hover {
       background: #69c040;
     }
+
+    /* ==================== MENSAGEM E IMAGEM DE REAÇÃO ==================== */
     #mensagemDino {
       margin-top: 20px;
       font-size: 1.3rem;
       color: #2b4d63;
       text-align: center;
-      min-height: 40px;
+      min-height: 50px;
+      font-weight: bold;
+    }
+
+    #imgDinoReacao {
+      width: 200px;
+      margin: 15px auto 0;
+      display: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .dino-principal {
+      width: 180px;
+      margin: 10px auto;
+      display: block;
     }
   </style>
 </head>
-<body>  <h1>🦖 Lista Dino!</h1>
-  <img src="https://i.imgur.com/5u6zFQh.png" alt="Dinossauro fofinho" style="width:180px; margin-bottom:15px;">  <div class="container">
+<body>
+
+  <!-- ==================== CABEÇALHO COM IMAGEM PRINCIPAL ==================== -->
+  <h1>Lista Dino!</h1>
+  <img src="https://i.imgur.com/5u6zFQh.png" alt="Dinossauro fofinho" class="dino-principal">
+
+  <!-- ==================== CONTAINER DA APLICAÇÃO ==================== -->
+  <div class="container">
     <input type="text" id="inputTarefa" placeholder="Digite uma tarefa...">
-    <button id="btnAdd">Adicionar</button><ul id="lista"></ul>
+    <button id="btnAdd">Adicionar</button>
 
-<div id="mensagemDino"></div>
-<img id="imgDinoReacao" src="" alt="" style="width:200px; display:none; margin-top:15px;">
+    <ul id="lista"></ul>
 
-  </div>  <script>
+    <div id="mensagemDino"></div>
+    <img id="imgDinoReacao" src="" alt="Reação do Dino" style="display:none;">
+  </div>
+
+  <script>
+    /* ==================== DADOS: FRASES E IMAGENS DE REAÇÃO ==================== */
     const frases = [
-      "Parabéns! Você rugiu igual um T-Rex! 🦖🔥",
-      "Uau! Forte como um Tricerátops! 💪🦕",
-      "Incrível! Ágil que nem um Velociraptor! ⚡🦖",
-      "Show! Inteligente igual um Troodon! 🤓🦕",
-      "Você dominou essa tarefa como um Espinossauro! 🌊🦖",
-      "Mandou bem! Poderoso como um Brachiossauro alcançando as alturas! 🌳🦕",
-      "Caraca! Você passou por isso igual um Ankylossauro tankando tudo! 🛡️🦖",
-      "Top! Mais rápido que um Compsognathus correndo atrás do rango! 🏃🦕",
-      "Brabo! Corajoso como um Allossauro na caçada! 🦖🔥",
-      "Sensacional! Você brilhou mais que um dinossauro com penas coloridas! 🪶🦕"
+      "Parabéns! Você rugiu igual um T-Rex!",
+      "Uau! Forte como um Tricerátops!",
+      "Incrível! Ágil que nem um Velociraptor!",
+      "Show! Inteligente igual um Troodon!",
+      "Você dominou essa tarefa como um Espinossauro!",
+      "Mandou bem! Poderoso como um Brachiossauro alcançando as alturas!",
+      "Caraca! Você passou por isso igual um Ankylossauro tankando tudo!",
+      "Top! Mais rápido que um Compsognathus correndo atrás do rango!",
+      "Brabo! Corajoso como um Allossauro na caçada!",
+      "Sensacional! Você brilhou mais que um dinossauro com penas coloridas!"
     ];
 
+    const imagensReacao = [
+      "https://i.imgur.com/8f3m2kP.png",
+      "https://i.imgur.com/1n8oL5Z.png",
+      "https://i.imgur.com/0vM5c3Y.png",
+      "https://i.imgur.com/4kL2w3X.png",
+      "https://i.imgur.com/7pR9v2B.png"
+    ];
+
+    /* ==================== SELEÇÃO DE ELEMENTOS DO DOM ==================== */
     const input = document.getElementById("inputTarefa");
     const btnAdd = document.getElementById("btnAdd");
     const lista = document.getElementById("lista");
     const msg = document.getElementById("mensagemDino");
+    const imgReacao = document.getElementById("imgDinoReacao");
 
-    btnAdd.addEventListener("click", () => {
+    /* ==================== EVENTOS DE INTERAÇÃO ==================== */
+    // Adiciona tarefa ao clicar no botão
+    btnAdd.addEventListener("click", adicionarTarefa);
+
+ jednot
+    // Adiciona tarefa ao pressionar Enter
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") adicionarTarefa();
+    });
+
+    /* ==================== FUNÇÃO PRINCIPAL: ADICIONAR TAREFA ==================== */
+    function adicionarTarefa() {
       const texto = input.value.trim();
-      if (texto === "") return;
+      if (texto === "") return; // Evita tarefas vazias
 
+      // Cria novo item da lista com botão de concluir
       const li = document.createElement("li");
-      li.textContent = texto;
+      li.innerHTML = `${texto} <button class="concluir">Concluir</button>`;
 
-      const btnC = document.createElement("button");
-      btnC.textContent = "Concluir";
-      btnC.classList.add("concluir");
+      // Evento ao concluir a tarefa
+      li.querySelector(".concluir").addEventListener("click", () => {
+        li.remove(); // Remove a tarefa da lista
 
-      btnC.addEventListener("click", () => {
-        li.remove();
-        const frase = frases[Math.floor(Math.random() * frases.length)];
-        msg.textContent = frase;
-        const imagens = [
-          "https://i.imgur.com/D5Qf9lx.png",
-          "https://i.imgur.com/MexqzH1.png",
-          "https://i.imgur.com/3y4lM8Y.png",
-          "https://i.imgur.com/Vkh6KzO.png",
-          "https://i.imgur.com/xKuR9u6.png"
-        ];
-        const img = document.getElementById("imgDinoReacao");
-        img.src = imagens[Math.floor(Math.random() * imagens.length)];
-        img.style.display = "block";
+        // Exibe mensagem aleatória de parabéns
+        const fraseAleatoria = frases[Math.floor(Math.random() * frases.length)];
+        msg.textContent = fraseAleatoria;
+
+        // Exibe imagem de reação aleatória
+        const imgAleatoria = imagensReacao[Math.floor(Math.random() * imagensReacao.length)];
+        imgReacao.src = imgAleatoria;
+        imgReacao.style.display = "block";
+
+        // Esconde a imagem após 4 segundos
+        setTimeout(() => {
+          imgReacao.style.display = "none";
+        }, 4000);
       });
 
-      li.appendChild(btnC);
+      // Adiciona o item à lista
       lista.appendChild(li);
 
+      // Limpa o campo e foca novamente
       input.value = "";
-    });
-  </script></body>
+      input.focus();
+    }
+  </script>
+</body>
 </html>
