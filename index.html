@@ -4,8 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista Dino</title>
+
+  <!-- ============================================================= -->
+  <!-- ====================== ESTILOS CSS ========================== -->
+  <!-- ============================================================= -->
   <style>
-    /* ==================== ESTILIZAÇÃO GERAL ==================== */
+    /* ---------- Corpo da página ---------- */
     body {
       font-family: "Comic Sans MS", sans-serif;
       background: #c0f0ff;
@@ -17,7 +21,7 @@
       min-height: 100vh;
     }
 
-    /* Título principal com sombra temática */
+    /* ---------- Título principal ---------- */
     h1 {
       color: #2b4d63;
       margin: 20px 0 10px;
@@ -25,7 +29,7 @@
       text-shadow: 2px 2px #7ee0ff;
     }
 
-    /* Container principal com bordas arredondadas e sombra */
+    /* ---------- Container central ---------- */
     .container {
       background: #ffffff;
       padding: 25px;
@@ -35,7 +39,7 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
 
-    /* ==================== CAMPOS DE ENTRADA ==================== */
+    /* ---------- Campo de texto e botão de adicionar ---------- */
     #inputTarefa {
       width: 68%;
       padding: 10px;
@@ -44,7 +48,6 @@
       font-size: 1.1rem;
       margin-right: 5px;
     }
-
     #btnAdd {
       padding: 10px 15px;
       background: #63bad1;
@@ -55,18 +58,10 @@
       cursor: pointer;
       vertical-align: middle;
     }
+    #btnAdd:hover { background: #4ca5bd; }
 
-    #btnAdd:hover {
-      background: #4ca5bd;
-    }
-
-    /* ==================== LISTA DE TAREFAS ==================== */
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-    }
-
+    /* ---------- Lista de tarefas ---------- */
+    ul { list-style: none; padding: 0; margin-top: 20px; }
     li {
       background: #e2f8ff;
       padding: 12px;
@@ -79,7 +74,7 @@
       border-left: 6px solid #63bad1;
     }
 
-    /* Botão de concluir tarefa */
+    /* ---------- Botão "Concluir" ---------- */
     button.concluir {
       background: #7ed957;
       border: none;
@@ -89,12 +84,9 @@
       cursor: pointer;
       font-weight: bold;
     }
+    button.concluir:hover { background: #69c040; }
 
-    button.concluir:hover {
-      background: #69c040;
-    }
-
-    /* ==================== MENSAGEM E IMAGEM DE REAÇÃO ==================== */
+    /* ---------- Mensagem e imagem de reação ---------- */
     #mensagemDino {
       margin-top: 20px;
       font-size: 1.3rem;
@@ -103,7 +95,6 @@
       min-height: 50px;
       font-weight: bold;
     }
-
     #imgDinoReacao {
       width: 200px;
       margin: 15px auto 0;
@@ -111,7 +102,6 @@
       border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
-
     .dino-principal {
       width: 180px;
       margin: 10px auto;
@@ -119,13 +109,19 @@
     }
   </style>
 </head>
+
 <body>
 
-  <!-- ==================== CABEÇALHO COM IMAGEM PRINCIPAL ==================== -->
-  <h1>Lista Dino!</h1>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/T-rex_holotype.jpg/320px-T-rex_holotype.jpg" alt="Dinossauro fofinho" class="dino-principal">
+  <!-- ============================================================= -->
+  <!-- ====================== ESTRUTURA HTML ======================= -->
+  <!-- ============================================================= -->
 
-  <!-- ==================== CONTAINER DA APLICAÇÃO ==================== -->
+  <!-- Título + Dino principal -->
+  <h1>Lista Dino!</h1>
+  <img src="https://cdn.pixabay.com/photo/2016/12/13/00/12/dinosaur-1905054_1280.png"
+       alt="Dinossauro fofinho" class="dino-principal">
+
+  <!-- Container da aplicação -->
   <div class="container">
     <input type="text" id="inputTarefa" placeholder="Digite uma tarefa...">
     <button id="btnAdd">Adicionar</button>
@@ -136,8 +132,11 @@
     <img id="imgDinoReacao" src="" alt="Reação do Dino" style="display:none;">
   </div>
 
+  <!-- ============================================================= -->
+  <!-- ====================== LÓGICA JS =========================== -->
+  <!-- ============================================================= -->
   <script>
-    /* ==================== DADOS: FRASES E IMAGENS DE REAÇÃO ==================== */
+    /* ---------- Frases de parabéns ---------- */
     const frases = [
       "Parabéns! Você rugiu igual um T-Rex! 🦖🔥",
       "Uau! Forte como um Tricerátops! 💪🦕",
@@ -151,65 +150,53 @@
       "Sensacional! Você brilhou mais que um dinossauro com penas coloridas! 🪶🦕"
     ];
 
-    // Imagens NOVAS e 100% funcionais de dinossauros fofos (de fontes estáveis)
+    /* ---------- Imagens de reação (Pixabay & CleanPNG – PNG transparentes, fofas e testadas!) ---------- */
     const imagensReacao = [
-      "https://images.unsplash.com/photo-1586746126239-d9ebb7a2a5e9?w=400&h=300&fit=crop",  // Dino fofo em ilustração
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop",  // Triceratops adorável
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",  // Dino dançando/animado
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",  // Velociraptor estiloso
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pteranodon_BW.jpg/400px-Pteranodon_BW.jpg"  // Dino voador com coração no tema
+      "https://cdn.pixabay.com/photo/2017/08/07/06/15/dinosaur-2603104_1280.png", // T-Rex fofo pulando de alegria
+      "https://cdn.pixabay.com/photo/2016/12/13/00/12/dinosaur-1905054_1280.png", // Dino verde sorridente e clássico
+      "https://cdn.pixabay.com/photo/2017/01/20/00/30/dinosaur-1990386_1280.png", // Dino cartoon dançando com chapéu
+      "https://cdn.pixabay.com/photo/2016/03/31/19/02/dinosaur-1295801_1280.png", // Tricerátops baby super fofo
+      "https://www.cleanpng.com/png-cartoon-dinosaur-green-dinosaur-cute-dinosaur-6617823/preview.png"  // Dino verde cute com pose feliz
     ];
 
-    /* ==================== SELEÇÃO DE ELEMENTOS DO DOM ==================== */
-    const input = document.getElementById("inputTarefa");
-    const btnAdd = document.getElementById("btnAdd");
-    const lista = document.getElementById("lista");
-    const msg = document.getElementById("mensagemDino");
-    const imgReacao = document.getElementById("imgDinoReacao");
+    /* ---------- Referências aos elementos do DOM ---------- */
+    const input   = document.getElementById("inputTarefa");
+    const btnAdd  = document.getElementById("btnAdd");
+    const lista   = document.getElementById("lista");
+    const msg     = document.getElementById("mensagemDino");
+    const imgReac = document.getElementById("imgDinoReacao");
 
-    /* ==================== EVENTOS DE INTERAÇÃO ==================== */
-    // Adiciona tarefa ao clicar no botão
+    /* ---------- Eventos de interação ---------- */
     btnAdd.addEventListener("click", adicionarTarefa);
+    input.addEventListener("keypress", e => { if (e.key === "Enter") adicionarTarefa(); });
 
-    // Adiciona tarefa ao pressionar Enter
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") adicionarTarefa();
-    });
-
-    /* ==================== FUNÇÃO PRINCIPAL: ADICIONAR TAREFA ==================== */
+    /* ---------- Função principal: criar tarefa ---------- */
     function adicionarTarefa() {
       const texto = input.value.trim();
-      if (texto === "") return; // Evita tarefas vazias
+      if (!texto) return;                     // Ignora entrada vazia
 
-      // Cria novo item da lista com botão de concluir
       const li = document.createElement("li");
       li.innerHTML = `${texto} <button class="concluir">Concluir</button>`;
 
-      // Evento ao concluir a tarefa
+      /* ----- Ao clicar em "Concluir" ----- */
       li.querySelector(".concluir").addEventListener("click", () => {
-        li.remove(); // Remove a tarefa da lista
+        li.remove();                          // Remove da lista
 
-        // Exibe mensagem aleatória de parabéns
-        const fraseAleatoria = frases[Math.floor(Math.random() * frases.length)];
-        msg.textContent = fraseAleatoria;
+        // Mensagem aleatória
+        const frase = frases[Math.floor(Math.random() * frases.length)];
+        msg.textContent = frase;
 
-        // Exibe imagem de reação aleatória
-        const imgAleatoria = imagensReacao[Math.floor(Math.random() * imagensReacao.length)];
-        imgReacao.src = imgAleatoria;
-        imgReacao.style.display = "block";
+        // Imagem aleatória + exibição temporária
+        const img = imagensReacao[Math.floor(Math.random() * imagensReacao.length)];
+        imgReac.src = img;
+        imgReac.style.display = "block";
 
-        // Esconde a imagem após 4 segundos
-        setTimeout(() => {
-          imgReacao.style.display = "none";
-        }, 4000);
+        setTimeout(() => { imgReac.style.display = "none"; }, 4000);
       });
 
-      // Adiciona o item à lista
-      lista.appendChild(li);
-
-      // Limpa o campo e foca novamente
-      input.value = "";
-      input.focus();
+      lista.appendChild(li);                  // Adiciona à lista
+      input.value = "";                       // Limpa campo
+      input.focus();                          // Volta o foco
     }
   </script>
 </body>
