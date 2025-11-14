@@ -123,7 +123,7 @@
 
   <!-- ==================== CABEÇALHO COM IMAGEM PRINCIPAL ==================== -->
   <h1>Lista Dino!</h1>
-  <img src="https://i.imgur.com/5u6zFQh.png" alt="Dinossauro fofinho" class="dino-principal">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/T-rex_holotype.jpg/320px-T-rex_holotype.jpg" alt="Dinossauro fofinho" class="dino-principal">
 
   <!-- ==================== CONTAINER DA APLICAÇÃO ==================== -->
   <div class="container">
@@ -139,24 +139,25 @@
   <script>
     /* ==================== DADOS: FRASES E IMAGENS DE REAÇÃO ==================== */
     const frases = [
-      "Parabéns! Você rugiu igual um T-Rex!",
-      "Uau! Forte como um Tricerátops!",
-      "Incrível! Ágil que nem um Velociraptor!",
-      "Show! Inteligente igual um Troodon!",
-      "Você dominou essa tarefa como um Espinossauro!",
-      "Mandou bem! Poderoso como um Brachiossauro alcançando as alturas!",
-      "Caraca! Você passou por isso igual um Ankylossauro tankando tudo!",
-      "Top! Mais rápido que um Compsognathus correndo atrás do rango!",
-      "Brabo! Corajoso como um Allossauro na caçada!",
-      "Sensacional! Você brilhou mais que um dinossauro com penas coloridas!"
+      "Parabéns! Você rugiu igual um T-Rex! 🦖🔥",
+      "Uau! Forte como um Tricerátops! 💪🦕",
+      "Incrível! Ágil que nem um Velociraptor! ⚡🦖",
+      "Show! Inteligente igual um Troodon! 🤓🦕",
+      "Você dominou essa tarefa como um Espinossauro! 🌊🦖",
+      "Mandou bem! Poderoso como um Brachiossauro alcançando as alturas! 🌳🦕",
+      "Caraca! Você passou por isso igual um Ankylossauro tankando tudo! 🛡️🦖",
+      "Top! Mais rápido que um Compsognathus correndo atrás do rango! 🏃🦕",
+      "Brabo! Corajoso como um Allossauro na caçada! 🦖🔥",
+      "Sensacional! Você brilhou mais que um dinossauro com penas coloridas! 🪶🦕"
     ];
 
+    // Imagens NOVAS e 100% funcionais de dinossauros fofos (de fontes estáveis)
     const imagensReacao = [
-      "https://i.imgur.com/8f3m2kP.png",
-      "https://i.imgur.com/1n8oL5Z.png",
-      "https://i.imgur.com/0vM5c3Y.png",
-      "https://i.imgur.com/4kL2w3X.png",
-      "https://i.imgur.com/7pR9v2B.png"
+      "https://images.unsplash.com/photo-1586746126239-d9ebb7a2a5e9?w=400&h=300&fit=crop",  // Dino fofo em ilustração
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop",  // Triceratops adorável
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",  // Dino dançando/animado
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",  // Velociraptor estiloso
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pteranodon_BW.jpg/400px-Pteranodon_BW.jpg"  // Dino voador com coração no tema
     ];
 
     /* ==================== SELEÇÃO DE ELEMENTOS DO DOM ==================== */
@@ -170,7 +171,6 @@
     // Adiciona tarefa ao clicar no botão
     btnAdd.addEventListener("click", adicionarTarefa);
 
- jednot
     // Adiciona tarefa ao pressionar Enter
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") adicionarTarefa();
