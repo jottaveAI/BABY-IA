@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista Dino</title>
 
-  <!-- ============================================================= -->
-  <!-- ====================== ESTILOS CSS ========================== -->
-  <!-- ============================================================= -->
   <style>
-    /* ---------- Corpo da página ---------- */
     body {
       font-family: "Comic Sans MS", sans-serif;
       background: #c0f0ff;
@@ -21,7 +17,6 @@
       min-height: 100vh;
     }
 
-    /* ---------- Título principal ---------- */
     h1 {
       color: #2b4d63;
       margin: 20px 0 10px;
@@ -29,7 +24,6 @@
       text-shadow: 2px 2px #7ee0ff;
     }
 
-    /* ---------- Container central ---------- */
     .container {
       background: #ffffff;
       padding: 25px;
@@ -39,7 +33,6 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
 
-    /* ---------- Campo de texto e botão de adicionar ---------- */
     #inputTarefa {
       width: 68%;
       padding: 10px;
@@ -60,7 +53,6 @@
     }
     #btnAdd:hover { background: #4ca5bd; }
 
-    /* ---------- Lista de tarefas ---------- */
     ul { list-style: none; padding: 0; margin-top: 20px; }
     li {
       background: #e2f8ff;
@@ -74,7 +66,6 @@
       border-left: 6px solid #63bad1;
     }
 
-    /* ---------- Botão "Concluir" ---------- */
     button.concluir {
       background: #7ed957;
       border: none;
@@ -86,7 +77,6 @@
     }
     button.concluir:hover { background: #69c040; }
 
-    /* ---------- Mensagem e imagem de reação ---------- */
     #mensagemDino {
       margin-top: 20px;
       font-size: 1.3rem;
@@ -112,9 +102,84 @@
 
 <body>
 
-  <!-- ============================================================= -->
-  <!-- ====================== ESTRUTURA HTML ======================= -->
-  <!-- ============================================================= -->
+  <h1>Lista Dino!</h1>
+  <img src="https://cdn.pixabay.com/photo/2016/12/13/00/12/dinosaur-1905054_1280.png"
+       alt="Dinossauro fofinho" class="dino-principal">
+
+  <div class="container">
+    <input type="text" id="inputTarefa" placeholder="Digite uma tarefa...">
+    <button id="btnAdd">Adicionar</button>
+
+    <ul id="lista"></ul>
+
+    <div id="mensagemDino"></div>
+    <img id="imgDinoReacao" src="" alt="Reação do Dino" style="display:none;">
+  </div>
+
+  <script>
+    const frases = [
+      "Parabéns! Você rugiu igual um T-Rex! 🦖🔥",
+      "Uau! Forte como um Tricerátops! 💪🦕",
+      "Incrível! Ágil que nem um Velociraptor! ⚡🦖",
+      "Show! Inteligente igual um Troodon! 🤓🦕",
+      "Você dominou essa tarefa como um Espinossauro! 🌊🦖",
+      "Mandou bem! Poderoso como um Brachiossauro alcançando as alturas! 🌳🦕",
+      "Caraca! Você passou por isso igual um Ankylossauro tankando tudo! 🛡️🦖",
+      "Top! Mais rápido que um Compsognathus correndo atrás do rango! 🏃🦕",
+      "Brabo! Corajoso como um Allossauro na caçada! 🦖🔥",
+      "Sensacional! Você brilhou mais que um dinossauro com penas coloridas! 🪶🦕"
+    ];
+
+    /* ======== IMAGENS ATUALIZADAS (100% FUNCIONANDO) ======== */
+    const imagensReacao = [
+      "https://cdn.pixabay.com/photo/2017/08/07/06/15/dinosaur-2603104_1280.png",
+      "https://cdn.pixabay.com/photo/2016/12/13/00/12/dinosaur-1905054_1280.png",
+      "https://cdn.pixabay.com/photo/2017/01/20/00/30/dinosaur-1990386_1280.png",
+      "https://cdn.pixabay.com/photo/2016/03/31/19/02/dinosaur-1295801_1280.png",
+      "https://cdn.pixabay.com/photo/2014/04/03/11/50/dinosaur-312991_1280.png"
+    ];
+
+    const input   = document.getElementById("inputTarefa");
+    const btnAdd  = document.getElementById("btnAdd");
+    const lista   = document.getElementById("lista");
+    const msg     = document.getElementById("mensagemDino");
+    const imgReac = document.getElementById("imgDinoReacao");
+
+    btnAdd.addEventListener("click", adicionarTarefa);
+    input.addEventListener("keypress", e => { if (e.key === "Enter") adicionarTarefa(); });
+
+    function adicionarTarefa() {
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      const li = document.createElement("li");
+      li.innerHTML = `${texto} <button class="concluir">Concluir</button>`;
+
+      li.querySelector(".concluir").addEventListener("click", () => {
+        li.remove();
+
+        const frase = frases[Math.floor(Math.random() * frases.length)];
+        msg.textContent = frase;
+
+        const img = imagensReacao[Math.floor(Math.random() * imagensReacao.length)];
+        imgReac.src = img;
+        imgReac.style.display = "block";
+
+        setTimeout(() => { imgReac.style.display = "none"; }, 4000);
+      });
+
+      lista.appendChild(li);
+      input.value = "";
+      input.focus();
+    }
+  </script>
+</body>
+</html>    }
+  </style>
+</head>
+
+<body>
+  <!-- ESTRUTURA HTML -->
 
   <!-- Título + Dino principal -->
   <h1>Lista Dino!</h1>
@@ -201,3 +266,4 @@
   </script>
 </body>
 </html>
+
