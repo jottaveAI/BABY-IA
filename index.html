@@ -1,140 +1,230 @@
-<!-- aqui vai o seu código html COMPLETO com o fundo verdinho e dinos transparentes, menos quantidade --><!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista Dino</title>  <style>
-    /* fundo verdinho claro com dinos transparentes espalhados */
+  <meta-name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista Dino</title>
+
+  <style>
+    /* aqui configuro o estilo geral da pag */
     body {
       font-family: "Comic Sans MS", sans-serif;
-      background: #ccffdd;
+      background: #d4f8d0; /* verde clarinho */
       margin: 0;
-      padding: 0;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    /* dinos de fundo menos quantidade e bem transparentes */
-    .dino-bg {
-      position: absolute;
-      width: 180px;
-      opacity: 0.12;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    .d1 { top: 5%; left: 10%; transform: rotate(-10deg); }
-    .d2 { top: 45%; left: 70%; transform: rotate(15deg); }
-    .d3 { top: 80%; left: 20%; transform: rotate(-25deg); }
-
-    /* container principal */
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    /* titulo */
+    /* titulo principal da pag */
     h1 {
-      text-align: center;
-      color: #2b7a4b;
-      margin-bottom: 20px;
-      text-shadow: 1px 1px 0px #fff;
+      color: #2b4d63;
+      margin: 20px 0 10px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px #7ee0ff;
     }
 
-    /* lista */
-    ul {
-      list-style: none;
-      padding: 0;
+    /* caixa que segura os inputs e lista */
+    .container {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
 
+    /* onde digita a tarefa */
+    #inputTarefa {
+      width: 68%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #63bad1;
+      font-size: 1.1rem;
+      margin-right: 5px;
+    }
+
+    /* botao de adicionar tarefa */
+    #btnAdd {
+      padding: 10px 15px;
+      background: #63bad1;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    #btnAdd:hover { background: #4ca5bd; }
+
+    /* estilo da lista e dos item */
+    ul { list-style: none; padding: 0; margin-top: 20px; }
     li {
-      background: #e9ffe9;
-      margin-bottom: 10px;
+      background: #e2f8ff;
       padding: 12px;
-      border-radius: 8px;
+      margin: 10px 0;
+      border-radius: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 18px;
+      font-size: 1.1rem;
+      border-left: 6px solid #63bad1;
     }
 
-    button {
-      background: #34a853;
-      color: white;
+    /* botao que marca a tarefa como concluida */
+    button.concluir {
+      background: #7ed957;
       border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: white;
       cursor: pointer;
-      font-size: 14px;
+      font-weight: bold;
+    }
+    button.concluir:hover { background: #69c040; }
+
+    /* aqui aparece a frase do dino quando conclui */
+    #mensagemDino {
+      margin-top: 20px;
+      font-size: 1.3rem;
+      color: #2b4d63;
+      text-align: center;
+      min-height: 50px;
+      font-weight: bold;
     }
 
-    button:hover {
-      background: #2e924a;
-    }
-
-    /* pop-up de frase */
-    .popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.25);
-      font-size: 20px;
+    /* imagem que muda quando conclui tarefa */
+    #imgDinoReacao {
+      width: 200px;
+      margin: 15px auto 0;
       display: none;
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
-  </style></head>
-<body>  <!-- dinos transparentes no fundo (não mexi nas suas imagens principais) -->  <img src="https://i.imgur.com/qeF9tU8.png" class="dino-bg d1">
-  <img src="https://i.imgur.com/6vKZJwP.png" class="dino-bg d2">
-  <img src="https://i.imgur.com/3u9G1bL.png" class="dino-bg d3">  <div class="container">
-    <h1>Lista Dino 🦕</h1><ul id="lista"></ul>
 
-<input id="tarefa" type="text" placeholder="digita tua tarefa..." style="width: 70%; padding: 10px; border-radius: 6px; border: 1px solid #aaa;">
-<button onclick="addTarefa()">Adicionar</button>
+    /* animaçãozinha de zoom */
+    #imgDinoReacao.show {
+      transform: scale(1.1);
+    }
 
-  </div>  <div id="popup" class="popup"></div>  <script>
+    /* dinossauro principal do topo */
+    .dino-principal {
+      width: 180px;
+      margin: 10px auto;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Lista Dino!</h1>
+
+  <!-- imagem principal do dinossauro bonitinho -->
+  <img src="https://png.pngtree.com/element_pic/00/16/10/1257fdf36893318.png"
+       alt="Dinossauro fofinho" class="dino-principal">
+
+  <div class="container">
+    
+    <!-- input onde digita a tarefa -->
+    <input type="text" id="inputTarefa" placeholder="Digite uma tarefa...">
+
+    <!-- botao pra adicionar -->
+    <button id="btnAdd">Adicionar</button>
+
+    <!-- lista onde as tarefas vao aparecendo -->
+    <ul id="lista"></ul>
+
+    <!-- onde aparece a frase aleatoria quando conclui -->
+    <div id="mensagemDino"></div>
+
+    <!-- imagem da reação do dino q muda sempre -->
+    <img id="imgDinoReacao" src="" alt="Reação do Dino">
+  </div>
+
+  <script>
+    /* lista de frases q aparece quando conclui a tarefa */
     const frases = [
-      "parabéns vc foi forte como um t-rex 🦖🔥",
-      "boa! mais agil q um velociraptor 🏃‍♂️💨",
-      "mandou mt! resistente igual um triceratops 🦕💪",
-      "top dms! feroz igual um allosaurus 😤🦖",
+      "parabéns voce rugiu igual um t rex",
+      "uau forte como um triceratops",
+      "incrível agil que nem um velociraptor",
+      "show inteligente igual um troodon",
+      "voce dominou essa tarefa como um espinossauro",
+      "mandou bem poderoso como um brachiossauro",
+      "caraca voce tankou igual um ankylossauro",
+      "top mais rapido que um compsognathus atras do rango",
+      "brabo corajoso como um allossauro",
+      "sensacional brilhou igual um dino com pena colorida"
     ];
 
-    function addTarefa() {
-      const campo = document.getElementById("tarefa");
-      const texto = campo.value.trim();
-      if (texto === "") return;
+    /* imagens que aparecem como reação */
+    const imagensReacao = [
+      "https://png.pngtree.com/png-clipart/20220108/ourmid/pngtree-cartoon-hand-drawn-cute-dinosaur-vector-material-png-image_4276165.png",
+      "https://png.pngtree.com/png-clipart/20250426/original/pngtree-happy-cartoon-dinosaur-with-big-smile-showing-playful-and-energetic-kid-png-image_20885833.png",
+      "https://png.pngtree.com/png-clipart/20250519/original/pngtree-cheerful-and-joyful-cartoon-t-rex-dinosaur-character-smiling-with-white-png-image_21032331.png",
+      "https://i.pinimg.com/736x/fb/0c/fd/fb0cfd75627de69e366519cfd4217ba6.jpg",
+      "https://png.pngtree.com/element_pic/00/16/10/1257fdf36893318.png"
+    ];
 
+    /* pegando os elementos do html */
+    const input   = document.getElementById("inputTarefa");
+    const btnAdd  = document.getElementById("btnAdd");
+    const lista   = document.getElementById("lista");
+    const msg     = document.getElementById("mensagemDino");
+    const imgReac = document.getElementById("imgDinoReacao");
+
+    /* quando clica adiciona tarefa */
+    btnAdd.addEventListener("click", adicionarTarefa);
+
+    /* quando aperta enter também */
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") adicionarTarefa();
+    });
+
+    /* função q adiciona e trata tudo da tarefa */
+    function adicionarTarefa() {
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      /* cria o item da lista */
       const li = document.createElement("li");
-      li.textContent = texto;
+      li.innerHTML = `${texto} <button class="concluir">Concluir</button>`;
 
-      const botao = document.createElement("button");
-      botao.textContent = "feito";
-      botao.onclick = () => concluir(li);
+      /* quando clica em concluir */
+      li.querySelector(".concluir").addEventListener("click", () => {
 
-      li.appendChild(botao);
-      document.getElementById("lista").appendChild(li);
-      campo.value = "";
+        /* remove a tarefa */
+        li.remove();
+
+        /* pega frase aleatoria */
+        const frase = frases[Math.floor(Math.random() * frases.length)];
+        msg.textContent = frase;
+
+        /* pega imagem aleatoria */
+        const img = imagensReacao[Math.floor(Math.random() * imagensReacao.length)];
+        imgReac.src = img;
+
+        /* mostra a imagem e faz animacao */
+        imgReac.style.display = "block";
+        imgReac.classList.add("show");
+
+        /* some depois duns segundos */
+        setTimeout(() => {
+          imgReac.classList.remove("show");
+          imgReac.style.display = "none";
+        }, 4000);
+      });
+
+      /* coloca item na lista */
+      lista.appendChild(li);
+
+      /* limpa e deixa o input pronto */
+      input.value = "";
+      input.focus();
     }
-
-    function concluir(item) {
-      item.remove();
-      frasePopup();
-    }
-
-    function frasePopup() {
-      const pop = document.getElementById("popup");
-      pop.textContent = frases[Math.floor(Math.random() * frases.length)];
-      pop.style.display = "block";
-
-      setTimeout(() => {
-        pop.style.display = "none";
-      }, 1500);
-    }
-  </script></body>
+  </script>
+</body>
 </html>
