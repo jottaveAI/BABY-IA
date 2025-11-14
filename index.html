@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta-name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista Dino</title>
-
-  <style>
-    /* aqui configuro o estilo geral da pag */
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista Dino</title>  <style>
     body {
       font-family: "Comic Sans MS", sans-serif;
-      background: #d4f8d0; /* verde clarinho */
+      background: #d4f8d0;
       margin: 0;
       padding: 20px;
       display: flex;
@@ -17,16 +13,12 @@
       align-items: center;
       min-height: 100vh;
     }
-
-    /* titulo principal da pag */
     h1 {
       color: #2b4d63;
       margin: 20px 0 10px;
       font-size: 2.5rem;
       text-shadow: 2px 2px #7ee0ff;
     }
-
-    /* caixa que segura os inputs e lista */
     .container {
       background: #ffffff;
       padding: 25px;
@@ -35,8 +27,6 @@
       max-width: 500px;
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
-
-    /* onde digita a tarefa */
     #inputTarefa {
       width: 68%;
       padding: 10px;
@@ -45,8 +35,6 @@
       font-size: 1.1rem;
       margin-right: 5px;
     }
-
-    /* botao de adicionar tarefa */
     #btnAdd {
       padding: 10px 15px;
       background: #63bad1;
@@ -58,8 +46,6 @@
       vertical-align: middle;
     }
     #btnAdd:hover { background: #4ca5bd; }
-
-    /* estilo da lista e dos item */
     ul { list-style: none; padding: 0; margin-top: 20px; }
     li {
       background: #e2f8ff;
@@ -72,8 +58,6 @@
       font-size: 1.1rem;
       border-left: 6px solid #63bad1;
     }
-
-    /* botao que marca a tarefa como concluida */
     button.concluir {
       background: #7ed957;
       border: none;
@@ -84,8 +68,6 @@
       font-weight: bold;
     }
     button.concluir:hover { background: #69c040; }
-
-    /* aqui aparece a frase do dino quando conclui */
     #mensagemDino {
       margin-top: 20px;
       font-size: 1.3rem;
@@ -94,8 +76,6 @@
       min-height: 50px;
       font-weight: bold;
     }
-
-    /* imagem que muda quando conclui tarefa */
     #imgDinoReacao {
       width: 200px;
       margin: 15px auto 0;
@@ -104,63 +84,34 @@
       transition: transform 0.3s ease;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
-
-    /* animaçãozinha de zoom */
     #imgDinoReacao.show {
       transform: scale(1.1);
     }
-
-    /* dinossauro principal do topo */
     .dino-principal {
       width: 180px;
       margin: 10px auto;
       display: block;
     }
-  </style>
-</head>
-
-<body>
-
-  <h1>Lista Dino!</h1>
-
-  <!-- imagem principal do dinossauro bonitinho -->
-  <img src="https://png.pngtree.com/element_pic/00/16/10/1257fdf36893318.png"
-       alt="Dinossauro fofinho" class="dino-principal">
-
-  <div class="container">
-    
-    <!-- input onde digita a tarefa -->
+  </style></head><body>  <h1>Lista Dino!</h1>  <img src="https://png.pngtree.com/element_pic/00/16/10/1257fdf36893318.png" alt="Dinossauro fofinho" class="dino-principal">  <div class="container">
     <input type="text" id="inputTarefa" placeholder="Digite uma tarefa...">
-
-    <!-- botao pra adicionar -->
     <button id="btnAdd">Adicionar</button>
-
-    <!-- lista onde as tarefas vao aparecendo -->
     <ul id="lista"></ul>
-
-    <!-- onde aparece a frase aleatoria quando conclui -->
     <div id="mensagemDino"></div>
-
-    <!-- imagem da reação do dino q muda sempre -->
     <img id="imgDinoReacao" src="" alt="Reação do Dino">
-  </div>
-
-  <script>
-    /* lista de frases q aparece quando conclui a tarefa */
+  </div>  <script>
     const frases = [
-      "parabéns voce rugiu igual um t rex",
-      "uau forte como um triceratops",
-      "incrível agil que nem um velociraptor",
-      "show inteligente igual um troodon",
-      "voce dominou essa tarefa como um espinossauro",
-      "mandou bem poderoso como um brachiossauro",
-      "caraca voce tankou igual um ankylossauro",
-      "top mais rapido que um compsognathus atras do rango",
-      "brabo corajoso como um allossauro",
-      "sensacional brilhou igual um dino com pena colorida"
+      "Parabéns! Você rugiu como um T-Rex.",
+      "Incrível! Forte como um Tricerátops.",
+      "Impressionante! Ágil como um Velociraptor.",
+      "Excelente! Inteligente como um Troodon.",
+      "Você dominou esta tarefa como um Espinossauro.",
+      "Muito bem! Poderoso como um Braquiossauro.",
+      "Ótimo trabalho! Resistente como um Anquilossauro.",
+      "Você foi rápido como um Compsognathus.",
+      "Parabéns! Corajoso como um Alossauro.",
+      "Sensacional! Brilhou como um dinossauro de penas coloridas."
     ];
 
-    /* imagens que aparecem como reação */
     const imagensReacao = [
       "https://png.pngtree.com/png-clipart/20220108/ourmid/pngtree-cartoon-hand-drawn-cute-dinosaur-vector-material-png-image_4276165.png",
       "https://png.pngtree.com/png-clipart/20250426/original/pngtree-happy-cartoon-dinosaur-with-big-smile-showing-playful-and-energetic-kid-png-image_20885833.png",
@@ -169,62 +120,46 @@
       "https://png.pngtree.com/element_pic/00/16/10/1257fdf36893318.png"
     ];
 
-    /* pegando os elementos do html */
-    const input   = document.getElementById("inputTarefa");
-    const btnAdd  = document.getElementById("btnAdd");
-    const lista   = document.getElementById("lista");
-    const msg     = document.getElementById("mensagemDino");
+    const input = document.getElementById("inputTarefa");
+    const btnAdd = document.getElementById("btnAdd");
+    const lista = document.getElementById("lista");
+    const msg = document.getElementById("mensagemDino");
     const imgReac = document.getElementById("imgDinoReacao");
 
-    /* quando clica adiciona tarefa */
     btnAdd.addEventListener("click", adicionarTarefa);
-
-    /* quando aperta enter também */
     input.addEventListener("keypress", e => {
       if (e.key === "Enter") adicionarTarefa();
     });
 
-    /* função q adiciona e trata tudo da tarefa */
     function adicionarTarefa() {
       const texto = input.value.trim();
       if (!texto) return;
 
-      /* cria o item da lista */
       const li = document.createElement("li");
       li.innerHTML = `${texto} <button class="concluir">Concluir</button>`;
 
-      /* quando clica em concluir */
       li.querySelector(".concluir").addEventListener("click", () => {
-
-        /* remove a tarefa */
         li.remove();
 
-        /* pega frase aleatoria */
         const frase = frases[Math.floor(Math.random() * frases.length)];
         msg.textContent = frase;
 
-        /* pega imagem aleatoria */
         const img = imagensReacao[Math.floor(Math.random() * imagensReacao.length)];
         imgReac.src = img;
 
-        /* mostra a imagem e faz animacao */
         imgReac.style.display = "block";
         imgReac.classList.add("show");
 
-        /* some depois duns segundos */
         setTimeout(() => {
           imgReac.classList.remove("show");
           imgReac.style.display = "none";
         }, 4000);
       });
 
-      /* coloca item na lista */
       lista.appendChild(li);
 
-      /* limpa e deixa o input pronto */
       input.value = "";
       input.focus();
     }
-  </script>
-</body>
+  </script></body>
 </html>
